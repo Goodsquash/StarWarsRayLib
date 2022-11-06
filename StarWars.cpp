@@ -28,15 +28,20 @@ int main(){
  const int windowHeight{450};
 InitWindow(windowWidth,windowHeight,"My Window");
 
-int framesCounter = 60*10;
+int framesCounter = 60*30;
 
 Texture2D obstacle = LoadTexture("resources/TieFighter.png");
 Texture2D xwing = LoadTexture("resources/X-Wing.png");
+Texture2D StarWars = LoadTexture("StarWarsTitle.png");
+
 
 
 float scrollingBack = 0.0f;
 
 Texture2D midground = LoadTexture("resources/Background.png");
+
+
+
 
 //Xwing_animation
 Anim xwingAnim;
@@ -57,7 +62,7 @@ TieFighter.rec.height = obstacle.height;
 TieFighter.rec.x=0;
 TieFighter.rec.y=0;
 TieFighter.pos.x = GetRandomValue(0,700);
-TieFighter.pos.y = 0;
+TieFighter.pos.y = -1000;
 
 
 //TieFighter2 animation
@@ -67,7 +72,7 @@ TieFighter2.rec.height = obstacle.height;
 TieFighter2.rec.x=0;
 TieFighter2.rec.y=0;
 TieFighter2.pos.x = GetRandomValue(0,700);
-TieFighter2.pos.y = -100;
+TieFighter2.pos.y = -1000;
 
 //TieFighter3 animation
 Anim TieFighter3;
@@ -76,7 +81,7 @@ TieFighter3.rec.height = obstacle.height;
 TieFighter3.rec.x=0;
 TieFighter3.rec.y=0;
 TieFighter3.pos.x = GetRandomValue(0,700);
-TieFighter3.pos.y = 0;
+TieFighter3.pos.y = -1000;
 
 
 //Bullet Number
@@ -298,7 +303,6 @@ UpdateMusicStream(music);
 BeginDrawing();
 
 
-
 for (int i = 0; i < num_bullets; i++)
     {
         if (bullet[i].active)
@@ -346,6 +350,9 @@ for (int i = 0; i < num_bullets; i++)
 
 ClearBackground(BLACK);
 
+
+
+
 if (framesCounter <= 0){
 framesCounter = 0;
 DrawText("You Have Won",150,200,50,BLUE);
@@ -353,16 +360,13 @@ DrawText("You Have Won",150,200,50,BLUE);
 else
 if (collision){
 DrawText("You Died",250,200,50,RED);
-}
-else
-//Play Death sound
-if (collision){
-PlaySound(death);
-}
 
+}
 
 	else{
 
+
+PlaySound(death);
 
 
 
@@ -371,13 +375,17 @@ PlaySound(death);
 DrawTextureEx(midground, (Vector2){ scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
 DrawTextureEx(midground, (Vector2){ midground.width*2 + scrollingBack, 20 }, 0.0f, 2.0f,WHITE);
 
+DrawTexture(StarWars,350,200,WHITE);
+
+
 DrawTextureRec(xwing,xwingAnim.rec,xwingAnim.pos,WHITE);
 
 DrawTextureRec(obstacle,TieFighter.rec,TieFighter.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter2.rec,TieFighter2.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter3.rec,TieFighter3.pos,WHITE);
 
-DrawText(TextFormat("Score: %i", framesCounter/60), 10, 10, 20, LIME);
+DrawText("Controls: \n W to Move Up \n S to Move Down \n A to move Left \n D to Move Right \n Press ESC to Close Game.",10,100,5,LIGHTGRAY);
+DrawText(TextFormat("Time Left: %i", framesCounter/60), 10, 10, 20, LIME);
 
 
 TieFighter.pos.y += tieVel* deltaTime;
@@ -390,6 +398,6 @@ EndDrawing();
 UnloadTexture(xwing);
 UnloadTexture(obstacle);
 UnloadTexture(midground);
-
+UnloadSound(death);
 CloseWindow();
 }
