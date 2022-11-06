@@ -9,13 +9,13 @@ struct Anim
 	float runningTime;  
 };
 struct Bullets{
-	Rectangle rect;
+	Rectangle rec;
 	Vector2 speed; 
 	Color color;
 	bool active;
 };
 struct Player {
-    Rectangle rect;
+    Rectangle rec;
     Vector2 speed;
     Color color;
 };
@@ -54,7 +54,7 @@ TieFighter.rec.height = obstacle.height;
 TieFighter.rec.x=0;
 TieFighter.rec.y=0;
 TieFighter.pos.x = GetRandomValue(500,0);
-TieFighter.pos.y = GetRandomValue(-100,0);
+TieFighter.pos.y = -100;
 
 Anim TieFighter2;
 TieFighter2.rec.width = obstacle.width;
@@ -62,7 +62,7 @@ TieFighter2.rec.height = obstacle.height;
 TieFighter2.rec.x=0;
 TieFighter2.rec.y=0;
 TieFighter2.pos.x = GetRandomValue(500,0);
-TieFighter2.pos.y = GetRandomValue(-100,0);
+TieFighter2.pos.y = -100;
 
 Anim TieFighter3;
 TieFighter3.rec.width = obstacle.width;
@@ -70,7 +70,7 @@ TieFighter3.rec.height = obstacle.height;
 TieFighter3.rec.x=0;
 TieFighter3.rec.y=0;
 TieFighter3.pos.x = GetRandomValue(500,0);
-TieFighter3.pos.y = GetRandomValue(-100,0);
+TieFighter3.pos.y = -100;
 
 
 Rectangle obRec;
@@ -90,23 +90,24 @@ int num_bullets{50};
 InitAudioDevice(); 
 
 Player player;
-player.rect.height= 50;
-player.rect.width = 50;
+player.rec.height= 20;
+player.rec.width = 20;
 player.color = RED;
-player.rect.x = windowWidth/2;
-player.rect.y = windowHeight-player.rect.height;
+player.rec.x = windowWidth/2;
+player.rec.y = windowHeight-player.rec.height;
 player.speed.x = 10;
 player.speed.y = 0;
 
 
 
+
 Bullets bullet[num_bullets];
 for (int i = 0; i<num_bullets; i++){
-bullet[i].rect.height= 10;
-bullet[i].rect.width = 10;
+bullet[i].rec.height= 10;
+bullet[i].rec.width = 10;
 bullet[i].color = RED;
-bullet[i].rect.x = (windowWidth/2)+(player.rect.width/2)-(bullet[i].rect.width/2);
-bullet[i].rect.y = (windowHeight-player.rect.height)-(bullet[i].rect.height);
+bullet[i].rec.x = player.rec.x;
+bullet[i].rec.y = player.rec.y + player.rec.height/4;
 bullet[i].speed.x = 50;
 bullet[i].speed.y = -10;
 bullet[i].active = false;}
@@ -125,12 +126,8 @@ bool collision{};
 
 
 Music music = LoadMusicStream("resources/Star_Wars_Medley.wav"); 
-
 Sound sound = LoadSound("resources/Quadlaser_turret_fire.wav");
-
-
 PlayMusicStream(music);
-
 Sound death= LoadSound("resources/R2D2.wav");
 
 
@@ -205,7 +202,7 @@ UpdateMusicStream(music);
 {
 	xwingAnim.pos.x += speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rect.x += speed*deltaTime;
+	player.rec.x += speed*deltaTime;
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -227,7 +224,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.x -= speed*deltaTime;
 	xwingAnim.rec.width = -xwing.width/6;
-	player.rect.x -= speed*deltaTime;
+	player.rec.x -= speed*deltaTime;
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -249,7 +246,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.y -= speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rect.y += speed*deltaTime;
+	player.rec.y += speed*deltaTime;
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -271,7 +268,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.y += speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rect.y -= speed*deltaTime;
+	player.rec.y -= speed*deltaTime;
 
 	xwingAnim.runningTime -= deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -300,7 +297,7 @@ BeginDrawing();
 for (int i = 0; i < num_bullets; i++)
     {
         if (bullet[i].active)
-            DrawRectangleRec(bullet[i].rect, bullet[i].color);
+            DrawRectangleRec(bullet[i].rec, bullet[i].color);
     }
 	
 		
@@ -313,8 +310,8 @@ for (int i = 0; i < num_bullets; i++)
             if (!bullet[i].active && shootRate % 40 == 0)
             {
 				PlaySound(sound);
-                bullet[i].rect.x = player.rect.x;
-                bullet[i].rect.y = player.rect.y + player.rect.height / 4;
+                bullet[i].rec.x = player.rec.x;
+                bullet[i].rec.y = player.rec.y + player.rec.height / 4;
                 bullet[i].active = true;
 				break;
             }
@@ -327,9 +324,10 @@ for (int i = 0; i < num_bullets; i++)
         if (bullet[i].active)
         {
            
-            bullet[i].rect.y += bullet[i].speed.y;
+            bullet[i].rec.y += bullet[i].speed.y;
+			
 
-            if (bullet[i].rect.y <= 0) 
+            if (bullet[i].rec.y <= 0) 
             {
                 bullet[i].active = false;
                 shootRate = 0;
@@ -362,7 +360,7 @@ xwingAnim.pos.y += velocity * deltaTime;
 obPos.y += obVel * deltaTime; 
 TieFighter.pos.y += tieVel* deltaTime;
 
-	}
+}
 EndDrawing();
 }
 UnloadTexture(xwing);
