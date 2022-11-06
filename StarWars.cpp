@@ -90,8 +90,8 @@ int num_bullets{50};
 InitAudioDevice(); 
 
 Player player;
-player.rec.height= 20;
-player.rec.width = 20;
+player.rec.height= 50;
+player.rec.width = 50;
 player.color = RED;
 player.rec.x = windowWidth/2;
 player.rec.y = windowHeight-player.rec.height;
@@ -365,6 +365,6 @@ EndDrawing();
 }
 UnloadTexture(xwing);
 UnloadTexture(obstacle);
-
+UnloadSound(death);
 CloseWindow();
 }
