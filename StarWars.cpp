@@ -23,22 +23,31 @@ struct Player {
 
 int main(){
 
+//window size (width and height)
+const int windowWidth{700};
+const int windowHeight{450};
 
- const int windowWidth{700};
- const int windowHeight{450};
+//window initilized 
 InitWindow(windowWidth,windowHeight,"My Window");
 
+
+//frame counter used for the countdown timer, frames are 60fps so the frame counter is multiplied by 30 to get 30 seconds
 int framesCounter = 60*30;
 
+// Textures for Tiefighter, xwing loaded
 Texture2D obstacle = LoadTexture("resources/TieFighter.png");
 Texture2D xwing = LoadTexture("resources/X-Wing.png");
 Texture2D StarWars = LoadTexture("StarWarsTitle.png");
 
 
-
+// background texture loaded
+Texture2D background = LoadTexture("resources/Background.png");
+// scrolling background float varible set so 0.0
 float scrollingBack = 0.0f;
 
-Texture2D midground = LoadTexture("resources/Background.png");
+
+
+
 
 
 
@@ -127,33 +136,37 @@ int speed{200};
 //Collision varible
 bool collision{};
 
-//Music Source
+//Music Source loaded
 Music music = LoadMusicStream("resources/Star_Wars_Medley.wav"); 
 
-//Sound Source for Bullet/Lazers
+//Sound Source for Bullet/Lazers loaded
 Sound sound = LoadSound("resources/Quadlaser_turret_fire.wav");
 
-//Play music
+//Starts music playing
 PlayMusicStream(music);
 
-//Collision Death sound
+//Collision Death sound loaded
 Sound death= LoadSound("resources/R2D2.wav");
 
-//Set FPS
+//Set Frames per second (FPS) to 60 
 SetTargetFPS(60);  
+//When window is not closed game is playing
 	while(!WindowShouldClose()){
 	
+//frame counter is decreased by 1 each frame	
 framesCounter--;
 
-
+//scrolling back set background screen
 scrollingBack -= 0.5f; 
-if (scrollingBack <= -midground.width*2) scrollingBack = 0;
+if (scrollingBack <= -background.width*2) scrollingBack = 0;
 
-//Start music playing
+//Updates buffers for music streaming
 UpdateMusicStream(music); 
-	
+
+	//Get time in seconds for last frame drawn (delta time)
 	const float deltaTime{GetFrameTime()};
 	
+
 	Rectangle xwingRec{
 	xwingAnim.pos.x,
 	xwingAnim.pos.y,
@@ -354,13 +367,46 @@ ClearBackground(BLACK);
 
 
 if (framesCounter <= 0){
-framesCounter = 0;
 DrawText("You Have Won",150,200,50,BLUE);
+if (framesCounter <= -200){
+	DrawText("You Have Won",150,200,50,PURPLE);
+	}
+if (framesCounter <= -400 ){
+	DrawText("You Have Won",150,200,50,GREEN);
+	}
+if (framesCounter <= -600 ){
+	DrawText("You Have Won",150,200,50,GOLD);
+	}
+
+	if (framesCounter == -800 ){
+		break;
+	}
 	}
 else
-if (collision){
-DrawText("You Died",250,200,50,RED);
 
+//if there is a collision draw fail screen and close when time reaches zero
+if (collision){
+
+if (framesCounter <= 1800){
+	DrawText("You are Dead",150,200,50,RED);
+	}
+
+if (framesCounter <= 1200){
+	DrawText("You are Dead",150,200,50,GRAY);
+	}
+if (framesCounter <= 600 ){
+	DrawText("You are Dead",150,200,50,DARKPURPLE );
+	}
+if (framesCounter <= 300 ){
+	DrawText("You are Dead",150,200,50,RED);
+	}
+
+
+
+	if (framesCounter == 1 ){
+		
+		break;
+	}
 }
 
 	else{
@@ -372,8 +418,8 @@ PlaySound(death);
 
 
 //Draw Scrolling Back ground
-DrawTextureEx(midground, (Vector2){ scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
-DrawTextureEx(midground, (Vector2){ midground.width*2 + scrollingBack, 20 }, 0.0f, 2.0f,WHITE);
+DrawTextureEx(background, (Vector2){ scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
+DrawTextureEx(background, (Vector2){ background.width*2 + scrollingBack, 20 }, 0.0f, 2.0f,WHITE);
 
 DrawTexture(StarWars,350,200,WHITE);
 
@@ -397,7 +443,7 @@ EndDrawing();
 }
 UnloadTexture(xwing);
 UnloadTexture(obstacle);
-UnloadTexture(midground);
+UnloadTexture(background);
 UnloadSound(death);
 CloseWindow();
 }
