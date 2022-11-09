@@ -34,17 +34,19 @@ InitWindow(windowWidth,windowHeight,"My Window");
 //frame counter used for the countdown timer, frames are 60fps so the frame counter is multiplied by 30 to get 30 seconds
 int framesCounter = 60*30;
 
+int score = 0;
+
 // Textures for Tiefighter, xwing loaded
 Texture2D obstacle = LoadTexture("resources/TieFighter.png");
 Texture2D xwing = LoadTexture("resources/X-Wing.png");
-Texture2D StarWars = LoadTexture("StarWarsTitle.png");
+Texture2D StarWars = LoadTexture("resources/StarWarsTitle.png");
+Texture2D BabyYoda = LoadTexture("resources/baby_yoda.png");
 
 
 // background texture loaded
 Texture2D background = LoadTexture("resources/Background.png");
 // scrolling background float varible set so 0.0
 float scrollingBack = 0.0f;
-
 
 
 
@@ -93,6 +95,14 @@ TieFighter3.pos.x = GetRandomValue(0,700);
 TieFighter3.pos.y = -1000;
 
 
+Anim BabyYodaAnim;
+BabyYodaAnim.rec.width = BabyYoda.width;
+BabyYodaAnim.rec.height = BabyYoda.height;
+BabyYodaAnim.rec.x=0;
+BabyYodaAnim.rec.y=0;
+BabyYodaAnim.pos.x = GetRandomValue(0,700);
+BabyYodaAnim.pos.y = -1000;
+
 //Bullet Number
 int num_bullets{50};
 
@@ -129,12 +139,15 @@ int shootRate = 0;
 int tieVel{GetRandomValue(80,300)};
 int tieVel2{GetRandomValue(80,300)};
 int tieVel3{GetRandomValue(80,300)};
+int yoda{GetRandomValue(80,300)};
 
 //X_Wing Movement Speed
 int speed{200};
 
 //Collision varible
 bool collision{};
+
+bool pickup{};
 
 //Music Source loaded
 Music music = LoadMusicStream("resources/Star_Wars_Medley.wav"); 
@@ -166,7 +179,7 @@ UpdateMusicStream(music);
 	//Get time in seconds for last frame drawn (delta time)
 	const float deltaTime{GetFrameTime()};
 	
-
+	//All Texture Rectangles drawn
 	Rectangle xwingRec{
 	xwingAnim.pos.x,
 	xwingAnim.pos.y,
@@ -191,7 +204,14 @@ UpdateMusicStream(music);
 	TieFighter3.rec.width,
 	TieFighter3.rec.height
 	};
+	Rectangle BabyYodaRec{
+	BabyYodaAnim.pos.x,
+	BabyYodaAnim.pos.y,
+	BabyYodaAnim.rec.width,
+	BabyYodaAnim.rec.height
+	};
 
+//TieFighter reset at random positions when they reach the bottom screen.
 	if (TieFighter.pos.y > 450) 
 	{
 		TieFighter.pos.x = GetRandomValue(0,200);
@@ -206,7 +226,12 @@ UpdateMusicStream(music);
 	{
 		TieFighter3.pos.x = GetRandomValue(360,450);
 		TieFighter3.pos.y = 0;
-	} 
+	}
+	if (BabyYodaAnim.pos.y > 450) 
+	{
+		BabyYodaAnim.pos.x = GetRandomValue(360,450);
+		BabyYodaAnim.pos.y = 0;
+	}  
 
 	if(CheckCollisionRecs(xwingRec,TieFighterRec)){
 		collision = true;
@@ -221,6 +246,15 @@ UpdateMusicStream(music);
 		
 	}
 
+	if(CheckCollisionRecs(xwingRec,BabyYodaRec)){
+		pickup = true;
+		score++;
+		BabyYodaAnim.pos.x = GetRandomValue(360,450);
+		BabyYodaAnim.pos.y = -100;
+	}
+
+
+//Xwing moves through animation when the D key is pressed and also moves across the screen
 	if(IsKeyDown(KEY_D))
 {
 	xwingAnim.pos.x += speed*deltaTime;
@@ -238,11 +272,14 @@ UpdateMusicStream(music);
 	}
 
 	}
+
 }
+	//Animations stops when key is released
 	if(IsKeyReleased(KEY_D))
 	{xwingAnim.frame = 0;
 	xwingAnim.rec.x = xwingAnim.frame* xwingAnim.rec.width;}
 
+//Xwing moves through animation when the A key is pressed and also moves across the screen
 	if(IsKeyDown(KEY_A))
 	{
 	xwingAnim.pos.x -= speed*deltaTime;
@@ -261,10 +298,12 @@ UpdateMusicStream(music);
 
 	}
 	}
+	//Animations stops when key is released
 	if(IsKeyReleased(KEY_A))
 	{xwingAnim.frame = 0;
 	xwingAnim.rec.x = xwingAnim.frame* xwingAnim.rec.width;}
 
+	//Xwing moves up the screen up the screen when W key is pressed
 	if(IsKeyDown(KEY_W))
 	{
 	xwingAnim.pos.y -= speed*deltaTime;
@@ -275,7 +314,7 @@ UpdateMusicStream(music);
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
 	{
 	xwingAnim.runningTime = 0.0;
-	xwingAnim.rec.y = xwingAnim.frame* xwingAnim.rec.width;
+	xwingAnim.rec.x = xwingAnim.frame* xwingAnim.rec.width;
 	xwingAnim.frame++;
 	if (xwingAnim.frame>5){
 	xwingAnim.frame = 0;
@@ -283,10 +322,12 @@ UpdateMusicStream(music);
 
 	}
 	}
+	
 	if(IsKeyReleased(KEY_W))
 	{xwingAnim.frame = 0;
 	xwingAnim.rec.y = xwingAnim.frame* xwingAnim.rec.width;}
 
+//Xwing down up the screen up the screen when S key
 	if(IsKeyDown(KEY_S))
 	{
 	xwingAnim.pos.y += speed*deltaTime;
@@ -332,8 +373,8 @@ for (int i = 0; i < num_bullets; i++)
             if (!bullet[i].active && shootRate % 40 == 0)
             {
 				PlaySound(sound);
-                bullet[i].rec.x = player.rec.x;
-                bullet[i].rec.y = player.rec.y + player.rec.height / 4;
+                bullet[i].rec.x = xwingAnim.pos.x+60;
+                bullet[i].rec.y = xwingAnim.pos.y+40;
                 bullet[i].active = true;
 				break;
             }
@@ -360,13 +401,13 @@ for (int i = 0; i < num_bullets; i++)
 
 
 
-
+//Black background so stars can be seen
 ClearBackground(BLACK);
 
+//if the framecounter, time limit equals zero win screen pops up and runs through text over time and then closes
 
-
-
-if (framesCounter <= 0){
+if (framesCounter <= 0){DrawText(TextFormat("Final Score: %i", score), 250, 250, 20, GREEN);  
+	num_bullets = 0;
 DrawText("You Have Won",150,200,50,BLUE);
 if (framesCounter <= -200){
 	DrawText("You Have Won",150,200,50,PURPLE);
@@ -384,23 +425,26 @@ if (framesCounter <= -600 ){
 	}
 else
 
-//if there is a collision draw fail screen and close when time reaches zero
-if (collision){
+//if there is a collision draws fail screen and runs through different text along with insult text
+if (collision){num_bullets = 0;
 
-if (framesCounter <= 1800){
-	DrawText("You are Dead",150,200,50,RED);
-	}
-
-if (framesCounter <= 1200){
-	DrawText("You are Dead",150,200,50,GRAY);
-	}
-if (framesCounter <= 600 ){
-	DrawText("You are Dead",150,200,50,DARKPURPLE );
-	}
-if (framesCounter <= 300 ){
-	DrawText("You are Dead",150,200,50,RED);
+if (framesCounter >= 1201){
+	DrawText("You Are Dead",150,200,50,GOLD);
+	DrawText("\n  You should have choosen \n     the Dark Side loser", 150,windowHeight/2,25,DARKGREEN);
 	}
 
+if (framesCounter >= 601 && framesCounter <= 1200){
+	DrawText("You Are Dead",150,200,50,RED);
+	DrawText("\n   We've shoved Baby Yoda\n  down the trash compactor\n                :'(", 150,windowHeight/2,25,PURPLE);
+	}
+if (framesCounter >= 301 && framesCounter <= 600 ){
+	DrawText("You Are Dead ",150,200,50,DARKPURPLE );
+	DrawText("\n   Can't believe you called \nTuskens Raiders 'Sand People'. \n        That's gross", 150,windowHeight/2,25,DARKGRAY);
+	}
+if (framesCounter  >= 1 && framesCounter <= 300 ){
+	DrawText("You Are Dead ",150,200,50,LIGHTGRAY);
+	DrawText("\n       Jar Jar Binks is now running a\n grass roots campaign against Palpatine.\n               It's not going well", 80,windowHeight/2,25,DARKBLUE);
+	}
 
 
 	if (framesCounter == 1 ){
@@ -412,16 +456,17 @@ if (framesCounter <= 300 ){
 	else{
 
 
+
 PlaySound(death);
 
-
-
+if (framesCounter >= 60*29 && framesCounter <= 60*30 ){
+DrawTexture(StarWars,100,100,WHITE);}
 
 //Draw Scrolling Back ground
-DrawTextureEx(background, (Vector2){ scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
-DrawTextureEx(background, (Vector2){ background.width*2 + scrollingBack, 20 }, 0.0f, 2.0f,WHITE);
+DrawTextureEx(background, (Vector2){ scrollingBack, 0 }, 0.0f, 2.0f, WHITE);
+DrawTextureEx(background, (Vector2){ background.width*2 + scrollingBack, 10 }, 0.0f, 2.0f,WHITE);
 
-DrawTexture(StarWars,350,200,WHITE);
+
 
 
 DrawTextureRec(xwing,xwingAnim.rec,xwingAnim.pos,WHITE);
@@ -429,14 +474,15 @@ DrawTextureRec(xwing,xwingAnim.rec,xwingAnim.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter.rec,TieFighter.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter2.rec,TieFighter2.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter3.rec,TieFighter3.pos,WHITE);
-
-DrawText("Controls: \n W to Move Up \n S to Move Down \n A to move Left \n D to Move Right \n Press ESC to Close Game.",10,100,5,LIGHTGRAY);
+DrawTextureRec(BabyYoda,BabyYodaAnim.rec,BabyYodaAnim.pos,WHITE);
+DrawText("Controls: \n W to Move Up \n S to Move Down \n A to Move Left \n D to Move Right \n Press ESC to Close Game.",10,100,5,LIGHTGRAY);
 DrawText(TextFormat("Time Left: %i", framesCounter/60), 10, 10, 20, LIME);
-
+DrawText(TextFormat("Score: %i", score), 600, 10, 20, BLUE);
 
 TieFighter.pos.y += tieVel* deltaTime;
 TieFighter2.pos.y += tieVel2* deltaTime;
 TieFighter3.pos.y += tieVel3* deltaTime;
+BabyYodaAnim.pos.y += yoda*deltaTime;
 
 }
 EndDrawing();
@@ -445,5 +491,7 @@ UnloadTexture(xwing);
 UnloadTexture(obstacle);
 UnloadTexture(background);
 UnloadSound(death);
+UnloadSound(sound);
+UnloadMusicStream(music);
 CloseWindow();
 }
