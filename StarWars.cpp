@@ -1,5 +1,6 @@
 #include "raylib.h"
 
+// Animation class
 struct Anim
 {
 	Rectangle rec; 
@@ -8,19 +9,15 @@ struct Anim
 	float updateTime; 
 	float runningTime;  
 };
+// Bullet Class
 struct Bullets{
 	Rectangle rec;
 	Vector2 speed; 
 	Color color;
 	bool active;
 };
-struct Player {
-    Rectangle rec;
-    Vector2 speed;
-    Color color;
-};
 
-
+//executes code
 int main(){
 
 //window size (width and height)
@@ -34,6 +31,7 @@ InitWindow(windowWidth,windowHeight,"My Window");
 //frame counter used for the countdown timer, frames are 60fps so the frame counter is multiplied by 30 to get 30 seconds
 int framesCounter = 60*30;
 
+//score varible
 int score = 0;
 
 // Textures for Tiefighter, xwing loaded
@@ -66,7 +64,7 @@ xwingAnim.frame = 0;
 xwingAnim.updateTime = 1.0/12.0;
 xwingAnim.runningTime = 0.0;
 
-//TieFighter animation
+//TieFighter oject using anim 
 Anim TieFighter;
 TieFighter.rec.width = obstacle.width;
 TieFighter.rec.height = obstacle.height;
@@ -76,7 +74,7 @@ TieFighter.pos.x = GetRandomValue(0,700);
 TieFighter.pos.y = -1000;
 
 
-//TieFighter2 animation
+//TieFighter2 object
 Anim TieFighter2;
 TieFighter2.rec.width = obstacle.width;
 TieFighter2.rec.height = obstacle.height;
@@ -85,7 +83,7 @@ TieFighter2.rec.y=0;
 TieFighter2.pos.x = GetRandomValue(0,700);
 TieFighter2.pos.y = -1000;
 
-//TieFighter3 animation
+//TieFighter3 object
 Anim TieFighter3;
 TieFighter3.rec.width = obstacle.width;
 TieFighter3.rec.height = obstacle.height;
@@ -94,7 +92,7 @@ TieFighter3.rec.y=0;
 TieFighter3.pos.x = GetRandomValue(0,700);
 TieFighter3.pos.y = -1000;
 
-
+// Baby Yoda item
 Anim BabyYodaAnim;
 BabyYodaAnim.rec.width = BabyYoda.width;
 BabyYodaAnim.rec.height = BabyYoda.height;
@@ -104,22 +102,10 @@ BabyYodaAnim.pos.x = GetRandomValue(0,700);
 BabyYodaAnim.pos.y = -1000;
 
 //Bullet Number
-int num_bullets{50};
+int num_bullets{20};
 
 //Audio Input Init 
 InitAudioDevice(); 
-
-
-//Player_Class
-Player player;
-player.rec.height= 50;
-player.rec.width = 50;
-player.color = RED;
-player.rec.x = windowWidth/2;
-player.rec.y = windowHeight-player.rec.height;
-player.speed.x = 10;
-player.speed.y = 0;
-
 
 
 //Bullets for Xwing
@@ -128,8 +114,8 @@ for (int i = 0; i<num_bullets; i++){
 bullet[i].rec.height= 10;
 bullet[i].rec.width = 10;
 bullet[i].color = RED;
-bullet[i].rec.x = player.rec.x;
-bullet[i].rec.y = player.rec.y + player.rec.height/4;
+bullet[i].rec.x = xwingAnim.rec.x;
+bullet[i].rec.y = xwingAnim.rec.y + xwingAnim.rec.height/4;
 bullet[i].speed.x = 50;
 bullet[i].speed.y = -10;
 bullet[i].active = false;}
@@ -147,7 +133,6 @@ int speed{200};
 //Collision varible
 bool collision{};
 
-bool pickup{};
 
 //Music Source loaded
 Music music = LoadMusicStream("resources/Star_Wars_Medley.wav"); 
@@ -155,11 +140,18 @@ Music music = LoadMusicStream("resources/Star_Wars_Medley.wav");
 //Sound Source for Bullet/Lazers loaded
 Sound sound = LoadSound("resources/Quadlaser_turret_fire.wav");
 
+//Sound Source when player death happens
+Sound death= LoadSound("resources/R2D2.wav");
+
+//Sound source when baby yoda is picked up
+Sound yahoo = LoadSound("resources/yahoo!.wav");
+
+//Sound source when tie figter is hit by bullet
+Sound TieDie = LoadSound("resources/TIE_fighter_explode.wav");
+
 //Starts music playing
 PlayMusicStream(music);
 
-//Collision Death sound loaded
-Sound death= LoadSound("resources/R2D2.wav");
 
 //Set Frames per second (FPS) to 60 
 SetTargetFPS(60);  
@@ -210,6 +202,13 @@ UpdateMusicStream(music);
 	BabyYodaAnim.rec.width,
 	BabyYodaAnim.rec.height
 	};
+	for (int i = 0; i<num_bullets; i++){
+	Rectangle BulletsRec{
+	bullet[i].rec.x, 
+	bullet[i].rec.y,
+	bullet[i].rec.width,
+	bullet[i].rec.height
+	};
 
 //TieFighter reset at random positions when they reach the bottom screen.
 	if (TieFighter.pos.y > 450) 
@@ -227,39 +226,74 @@ UpdateMusicStream(music);
 		TieFighter3.pos.x = GetRandomValue(360,450);
 		TieFighter3.pos.y = 0;
 	}
+
+// Baby Yoda reset code
 	if (BabyYodaAnim.pos.y > 450) 
 	{
 		BabyYodaAnim.pos.x = GetRandomValue(360,450);
 		BabyYodaAnim.pos.y = 0;
 	}  
-
+// Bullet rec reset code, used so it doesn't hit off screen tiefighters after they reset
+	if (bullet[i].rec.y <=0) 
+	{
+		bullet[i].rec.x = -10000;
+		bullet[i].rec.y = -10000;
+	}  
+//When the xwing collides with Tie Fighters the collision is switch to true and also plays death sound.
 	if(CheckCollisionRecs(xwingRec,TieFighterRec)){
 		collision = true;
-		
+		PlaySound(death);
 	}
 	if(CheckCollisionRecs(xwingRec,TieFighterRec2)){
 		collision = true;
-		
+		PlaySound(death);
 	}
 	if(CheckCollisionRecs(xwingRec,TieFighterRec3)){
 		collision = true;
-		
+		PlaySound(death);
 	}
 
+// if statement for when xwing hits baby yoda his rec is reset, score is added and sound is played
 	if(CheckCollisionRecs(xwingRec,BabyYodaRec)){
-		pickup = true;
+	
+		BabyYodaAnim.pos.x = GetRandomValue(50,600);
+		BabyYodaAnim.pos.y = -300;
 		score++;
-		BabyYodaAnim.pos.x = GetRandomValue(360,450);
-		BabyYodaAnim.pos.y = -100;
+		PlaySound(yahoo);
 	}
 
+// if statement for when bullets hit Tie Fighter, Tie Fighter position is reset, score is added and sound plays.
+	if(CheckCollisionRecs(BulletsRec,TieFighterRec)){
+	
+		TieFighter.pos.x = GetRandomValue(100,450);
+		TieFighter.pos.y = -100;
+		score = score + 2;
+		PlaySound(TieDie);
+	}
+	if(CheckCollisionRecs(BulletsRec,TieFighterRec2)){
+
+		TieFighter2.pos.x = GetRandomValue(100,450);
+		TieFighter2.pos.y = -100;
+		score = score +1;
+		PlaySound(TieDie);
+	
+	}
+	if(CheckCollisionRecs(BulletsRec,TieFighterRec3)){
+		TieFighter3.pos.x = GetRandomValue(100,450);
+		TieFighter3.pos.y = -100;
+		score = score +1;
+		PlaySound(TieDie);
+	}
+}
+
+	
 
 //Xwing moves through animation when the D key is pressed and also moves across the screen
 	if(IsKeyDown(KEY_D))
 {
 	xwingAnim.pos.x += speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rec.x += speed*deltaTime;
+
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -284,7 +318,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.x -= speed*deltaTime;
 	xwingAnim.rec.width = -xwing.width/6;
-	player.rec.x -= speed*deltaTime;
+
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -308,7 +342,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.y -= speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rec.y += speed*deltaTime;
+
 
 	xwingAnim.runningTime += deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -332,7 +366,7 @@ UpdateMusicStream(music);
 	{
 	xwingAnim.pos.y += speed*deltaTime;
 	xwingAnim.rec.width = xwing.width/6;
-	player.rec.y -= speed*deltaTime;
+
 
 	xwingAnim.runningTime -= deltaTime; 
 	if(xwingAnim.runningTime >= xwingAnim.updateTime)
@@ -356,21 +390,20 @@ UpdateMusicStream(music);
 
 BeginDrawing();
 
-
+//draws bullets if active
 for (int i = 0; i < num_bullets; i++)
     {
         if (bullet[i].active)
             DrawRectangleRec(bullet[i].rec, bullet[i].color);
     }
 	
-		
-
+//bullets are fire when space is held down
     if (IsKeyDown(KEY_SPACE))
     {
         shootRate += 5;
         for (int i = 0; i <num_bullets; i++)
         {
-            if (!bullet[i].active && shootRate % 40 == 0)
+            if (!bullet[i].active && shootRate % 60 == 0)
             {
 				PlaySound(sound);
                 bullet[i].rec.x = xwingAnim.pos.x+60;
@@ -408,9 +441,12 @@ ClearBackground(BLACK);
 
 if (framesCounter <= 0){DrawText(TextFormat("Final Score: %i", score), 250, 250, 20, GREEN);  
 	num_bullets = 0;
+	
 DrawText("You Have Won",150,200,50,BLUE);
+
 if (framesCounter <= -200){
 	DrawText("You Have Won",150,200,50,PURPLE);
+	
 	}
 if (framesCounter <= -400 ){
 	DrawText("You Have Won",150,200,50,GREEN);
@@ -425,7 +461,7 @@ if (framesCounter <= -600 ){
 	}
 else
 
-//if there is a collision draws fail screen and runs through different text along with insult text
+//if there is a collision draws fail screen and runs through different text along with insult text, if the frame counter equals 1 the screen closes
 if (collision){num_bullets = 0;
 
 if (framesCounter >= 1201){
@@ -439,7 +475,7 @@ if (framesCounter >= 601 && framesCounter <= 1200){
 	}
 if (framesCounter >= 301 && framesCounter <= 600 ){
 	DrawText("You Are Dead ",150,200,50,DARKPURPLE );
-	DrawText("\n   Can't believe you called \nTuskens Raiders 'Sand People'. \n        That's gross", 150,windowHeight/2,25,DARKGRAY);
+	DrawText("\n   Stormtroopers called \n  they want their aim back", 150,windowHeight/2,25,DARKGRAY);
 	}
 if (framesCounter  >= 1 && framesCounter <= 300 ){
 	DrawText("You Are Dead ",150,200,50,LIGHTGRAY);
@@ -457,8 +493,9 @@ if (framesCounter  >= 1 && framesCounter <= 300 ){
 
 
 
-PlaySound(death);
 
+
+//draws Star Wars Tile for a second at the start of the game
 if (framesCounter >= 60*29 && framesCounter <= 60*30 ){
 DrawTexture(StarWars,100,100,WHITE);}
 
@@ -466,32 +503,49 @@ DrawTexture(StarWars,100,100,WHITE);}
 DrawTextureEx(background, (Vector2){ scrollingBack, 0 }, 0.0f, 2.0f, WHITE);
 DrawTextureEx(background, (Vector2){ background.width*2 + scrollingBack, 10 }, 0.0f, 2.0f,WHITE);
 
-
-
-
+//Draws Xwing texture
 DrawTextureRec(xwing,xwingAnim.rec,xwingAnim.pos,WHITE);
 
+//Draws Tie Fighter 1,2,3 Texture
 DrawTextureRec(obstacle,TieFighter.rec,TieFighter.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter2.rec,TieFighter2.pos,WHITE);
 DrawTextureRec(obstacle,TieFighter3.rec,TieFighter3.pos,WHITE);
-DrawTextureRec(BabyYoda,BabyYodaAnim.rec,BabyYodaAnim.pos,WHITE);
-DrawText("Controls: \n W to Move Up \n S to Move Down \n A to Move Left \n D to Move Right \n Press ESC to Close Game.",10,100,5,LIGHTGRAY);
-DrawText(TextFormat("Time Left: %i", framesCounter/60), 10, 10, 20, LIME);
-DrawText(TextFormat("Score: %i", score), 600, 10, 20, BLUE);
 
+//Draws Baby Yoda Texture
+DrawTextureRec(BabyYoda,BabyYodaAnim.rec,BabyYodaAnim.pos,WHITE);
+
+// Draws Controls Text to left of the screen
+DrawText("\n Controls: \n W to Move Up \n S to Move Down \n A to Move Left \n D to Move Right \n Press Space to Fire Laser \n Press ESC to Close Game.",10,100,5,LIGHTGRAY);
+
+//Draws timer at top left
+DrawText(TextFormat("Time Left: %i", framesCounter/60), 10, 10, 20, LIME);
+
+//Draws Score at top right 
+DrawText(TextFormat("Score: %i", score), 550, 10, 20, BLUE);
+
+
+//Objects failing speed 
 TieFighter.pos.y += tieVel* deltaTime;
 TieFighter2.pos.y += tieVel2* deltaTime;
 TieFighter3.pos.y += tieVel3* deltaTime;
 BabyYodaAnim.pos.y += yoda*deltaTime;
 
 }
+//Ends drawing
 EndDrawing();
 }
+//Unloads Textures and sounds
 UnloadTexture(xwing);
 UnloadTexture(obstacle);
 UnloadTexture(background);
+UnloadTexture(BabyYoda);
+UnloadTexture(StarWars);
 UnloadSound(death);
 UnloadSound(sound);
+UnloadSound(yahoo);
+UnloadSound(TieDie);
 UnloadMusicStream(music);
+
+//Window Closes
 CloseWindow();
 }
