@@ -42,14 +42,9 @@ Texture2D BabyYoda = LoadTexture("resources/baby_yoda.png");
 
 
 // background texture loaded
-Texture2D background = LoadTexture("resources/Background.png");
+Texture2D background = LoadTexture("resources/background1.png");
 // scrolling background float varible set so 0.0
-float scrollingBack = 0.0f;
-
-
-
-
-
+float scrollingBack = 1000.0f;
 
 
 //Xwing_animation
@@ -163,7 +158,7 @@ framesCounter--;
 
 //scrolling back set background screen
 scrollingBack -= 0.5f; 
-if (scrollingBack <= -background.width*2) scrollingBack = 0;
+if (scrollingBack <= -background.height*2) scrollingBack = 0;
 
 //Updates buffers for music streaming
 UpdateMusicStream(music); 
@@ -493,15 +488,15 @@ if (framesCounter  >= 1 && framesCounter <= 300 ){
 
 
 
+//Draw Scrolling Back ground
+DrawTextureEx(background, (Vector2){ 0, -scrollingBack }, 0.0f, 2.0f, WHITE);
+DrawTextureEx(background, (Vector2){ 0, background.height*2 + -scrollingBack}, 0.0f, 2.0f,WHITE);
 
 
 //draws Star Wars Tile for a second at the start of the game
 if (framesCounter >= 60*29 && framesCounter <= 60*30 ){
 DrawTexture(StarWars,100,100,WHITE);}
 
-//Draw Scrolling Back ground
-DrawTextureEx(background, (Vector2){ scrollingBack, 0 }, 0.0f, 2.0f, WHITE);
-DrawTextureEx(background, (Vector2){ background.width*2 + scrollingBack, 10 }, 0.0f, 2.0f,WHITE);
 
 //Draws Xwing texture
 DrawTextureRec(xwing,xwingAnim.rec,xwingAnim.pos,WHITE);
