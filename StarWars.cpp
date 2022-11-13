@@ -262,7 +262,7 @@ UpdateMusicStream(music);
 	
 		TieFighter.pos.x = GetRandomValue(100,450);
 		TieFighter.pos.y = -100;
-		score = score + 2;
+		score = score + 1;
 		PlaySound(TieDie);
 	}
 	if(CheckCollisionRecs(BulletsRec,TieFighterRec2)){
@@ -380,12 +380,7 @@ UpdateMusicStream(music);
 	xwingAnim.rec.y = xwingAnim.frame* xwingAnim.rec.width;}
 
 
-
-
-
-BeginDrawing();
-
-//draws bullets if active
+//Sets bullets rec if active
 for (int i = 0; i < num_bullets; i++)
     {
         if (bullet[i].active)
@@ -427,6 +422,7 @@ for (int i = 0; i < num_bullets; i++)
         }
     }
 
+BeginDrawing();
 
 
 //Black background so stars can be seen
@@ -461,7 +457,7 @@ if (collision){num_bullets = 0;
 
 if (framesCounter >= 1201){
 	DrawText("You Are Dead",150,200,50,GOLD);
-	DrawText("\n  You should have choosen \n     the Dark Side loser", 150,windowHeight/2,25,DARKGREEN);
+	DrawText("\n  You should have chosen \n     the Dark Side loser", 150,windowHeight/2,25,DARKGREEN);
 	}
 
 if (framesCounter >= 601 && framesCounter <= 1200){
